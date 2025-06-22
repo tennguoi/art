@@ -1,0 +1,88 @@
+CREATE TABLE nguoi_dung (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ten_dang_nhap VARCHAR(50) UNIQUE NOT NULL,
+    mat_khau VARCHAR(255) NOT NULL,
+    ho_ten VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    so_dien_thoai VARCHAR(20),
+    vai_tro ENUM('Admin', 'Staff') NOT NULL DEFAULT 'Staff',
+    trang_thai ENUM('hoat_dong', 'dang_xuat') NOT NULL DEFAULT 'hoat_dong',
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ngay_cap_nhat TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+-- Bảng the_loai (thể loại tranh)
+CREATE TABLE the_loai (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ten VARCHAR(100) NOT NULL,
+    mo_ta TEXT,
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Bảng tranh (quản lý tranh)
+CREATE TABLE tranh (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ten VARCHAR(200) NOT NULL,
+    hoa_si VARCHAR(100) NOT NULL,
+    the_loai_id INT,
+    kich_thuoc VARCHAR(50), -- VD: "50x70cm"
+    gia_ban DECIMAL(12,2) NOT NULL,
+    gia_mua DECIMAL(12,2) DEFAULT 0,
+    mo_ta TEXT,
+    duong_dan_anh VARCHAR(500),
+    ghi_chu_tinh_trang TEXT,
+    trang_thai ENUM('co_san', 'da_ban', 'da_dat_coc', 'hong') NOT NULL DEFAULT 'co_san',
+    nguoi_tao_id INT,
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ngay_cap_nhat TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (the_loai_id) REFERENCES the_loai(id) ON DELETE SET NULL,
+    FOREIGN KEY (nguoi_tao_id) REFERENCES nguoi_dung(id) ON DELETE SET NULL,
+    
+    INDEX idx_ten (ten),
+    INDEX idx_hoa_si (hoa_si),
+    INDEX idx_trang_thai (trang_thai),
+    INDEX idx_gia_ban (gia_ban),
+    INDEX idx_ngay_tao (ngay_tao)
+);
+
+-- Bảng khach_hang
+CREATE TABLE khach_hang (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ho_ten VARCHAR(100) NOT NULL,
+    so_dien_thoai VARCHAR(20),
+    email VARCHAR(100),
+    dia_chi TEXT,
+    ghi_chu TEXT,
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ngay_cap_nhat TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_ho_ten (ho_ten),
+    INDEX idx_so_dien_thoai (so_dien_thoai)
+);
+
+-- Bảng giao_dich
+CREATE TABLE giao_dich (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tranh_id INT NOT NULL,
+    khach_hang_id INT,
+    loai_giao_dich ENUM('mua_vao', 'ban_ra') NOT NULL,
+    gia DECIMAL(12,2) NOT NULL,
+    so_luong INT DEFAULT 1,
+    ngay_giao_dich DATE NOT NULL,
+    phuong_thuc_thanh_toan ENUM('tien_mat', 'chuyen_khoan', 'the_tin_dung', 'khac') DEFAULT 'tien_mat',
+    trang_thai_thanh_toan ENUM('cho_xu_ly', 'hoan_thanh', 'da_huy') DEFAULT 'hoan_thanh',
+    ghi_chu TEXT,
+    nhan_vien_id INT,
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ngay_cap_nhat TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (tranh_id) REFERENCES tranh(id) ON DELETE CASCADE,
+    FOREIGN KEY (khach_hang_id) REFERENCES khach_hang(id) ON DELETE SET NULL,
+    FOREIGN KEY (nhan_vien_id) REFERENCES nguoi_dung(id) ON DELETE SET NULL,
+    
+    INDEX idx_ngay_giao_dich (ngay_giao_dich),
+    INDEX idx_loai_giao_dich (loai_giao_dich),
+    INDEX idx_nhan_vien_id (nhan_vien_id)
+);
